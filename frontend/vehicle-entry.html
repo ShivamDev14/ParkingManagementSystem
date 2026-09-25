@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Vehicle Entry - Parking Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="dashboard-container">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-small">
+                🅿
+            </div>
+
+            <h2>Parking System</h2>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="dashboard.html"
+               class="nav-item">
+
+                <span>📊</span>
+                Dashboard
+
+            </a>
+
+
+            <a href="vehicle-entry.html"
+               class="nav-item active">
+
+                <span>🚗</span>
+                Vehicle Entry
+
+            </a>
+
+
+            <a href="vehicle-exit.html"
+               class="nav-item">
+
+                <span>🚙</span>
+                Vehicle Exit
+
+            </a>
+
+
+            <a href="parking-slots.html"
+               class="nav-item">
+
+                <span>🅿️</span>
+                Parking Slots
+
+            </a>
+
+
+            <a href="parking-history.html"
+               class="nav-item">
+
+                <span>📋</span>
+                Parking History
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html"
+               class="nav-item logout">
+
+                <span>🚪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="top-header">
+
+            <div>
+
+                <h1>Vehicle Entry</h1>
+
+                <p>
+                    Register a vehicle entering the parking area
+                </p>
+
+            </div>
+
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div>
+
+                    <strong>Admin</strong>
+
+                    <small>Administrator</small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= ENTRY FORM ================= -->
+
+        <section class="form-card">
+
+
+            <div class="form-header">
+
+                <h2>Vehicle Entry Details</h2>
+
+                <p>
+                    Enter the vehicle information below
+                </p>
+
+            </div>
+
+
+
+            <form
+                    class="vehicle-form"
+                    id="vehicleEntryForm"
+            >
+
+
+                <!-- ================= VEHICLE NUMBER ================= -->
+
+                <div class="form-group">
+
+                    <label for="vehicleNumber">
+                        Vehicle Number
+                    </label>
+
+                    <input
+                            type="text"
+                            id="vehicleNumber"
+                            placeholder="Example: MH01AB1234"
+                            maxlength="20"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- ================= OWNER NAME ================= -->
+
+                <div class="form-group">
+
+                    <label for="ownerName">
+                        Owner Name
+                    </label>
+
+                    <input
+                            type="text"
+                            id="ownerName"
+                            placeholder="Enter owner name"
+                            maxlength="100"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- ================= PHONE NUMBER ================= -->
+
+                <div class="form-group">
+
+                    <label for="phoneNumber">
+                        Phone Number
+                    </label>
+
+                    <input
+                            type="tel"
+                            id="phoneNumber"
+                            placeholder="Enter phone number"
+                            maxlength="15"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- ================= VEHICLE TYPE ================= -->
+
+                <div class="form-group">
+
+                    <label for="vehicleType">
+                        Vehicle Type
+                    </label>
+
+                    <select
+                            id="vehicleType"
+                            required
+                    >
+
+                        <option value="">
+                            Select vehicle type
+                        </option>
+
+                        <option value="Car">
+                            Car
+                        </option>
+
+                        <option value="Bike">
+                            Bike
+                        </option>
+
+                        <option value="SUV">
+                            SUV
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- ================= BUTTONS ================= -->
+
+                <div class="form-actions">
+
+                    <button
+                            type="reset"
+                            class="btn-secondary"
+                    >
+                        Clear
+                    </button>
+
+
+                    <button
+                            type="submit"
+                            class="btn-primary"
+                            id="parkButton"
+                    >
+                        Park Vehicle
+                    </button>
+
+                </div>
+
+
+            </form>
+
+        </section>
+
+
+
+        <!-- ================= INFORMATION CARD ================= -->
+
+        <section class="info-card">
+
+            <div class="info-icon">
+                ℹ️
+            </div>
+
+            <div>
+
+                <h3>Parking Information</h3>
+
+                <p>
+                    The system automatically assigns the first
+                    available parking slot to the vehicle.
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     VEHICLE ENTRY JAVASCRIPT
+     ===================================================== -->
+
+<script>
+
+
+    // =====================================================
+    // BACKEND URL
+    // =====================================================
+
+    const API_BASE_URL =
+        "http://localhost:8080";
+
+
+    // =====================================================
+    // FORM
+    // =====================================================
+
+    const vehicleEntryForm =
+        document.getElementById(
+            "vehicleEntryForm"
+        );
+
+
+    const parkButton =
+        document.getElementById(
+            "parkButton"
+        );
+
+
+
+    // =====================================================
+    // VEHICLE ENTRY
+    // =====================================================
+
+    vehicleEntryForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            // =========================
+            // GET FORM VALUES
+            // =========================
+
+            const vehicleNumber =
+                document
+                    .getElementById(
+                        "vehicleNumber"
+                    )
+                    .value
+                    .trim()
+                    .toUpperCase();
+
+
+            const ownerName =
+                document
+                    .getElementById(
+                        "ownerName"
+                    )
+                    .value
+                    .trim();
+
+
+            const phoneNumber =
+                document
+                    .getElementById(
+                        "phoneNumber"
+                    )
+                    .value
+                    .trim();
+
+
+            const vehicleType =
+                document
+                    .getElementById(
+                        "vehicleType"
+                    )
+                    .value;
+
+
+
+            // =========================
+            // BASIC VALIDATION
+            // =========================
+
+            if (
+                !vehicleNumber ||
+                !ownerName ||
+                !phoneNumber ||
+                !vehicleType
+            ) {
+
+                alert(
+                    "Please fill in all fields."
+                );
+
+                return;
+
+            }
+
+
+
+            // =========================
+            // DISABLE BUTTON
+            // =========================
+
+            parkButton.disabled = true;
+
+            parkButton.textContent =
+                "Parking...";
+
+
+
+            try {
+
+
+                // =========================
+                // SEND REQUEST
+                // =========================
+
+                const response =
+                    await fetch(
+                        API_BASE_URL +
+                        "/api/vehicle/entry",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded"
+                            },
+
+                            body:
+                                "vehicleNumber=" +
+                                encodeURIComponent(
+                                    vehicleNumber
+                                ) +
+
+                                "&ownerName=" +
+                                encodeURIComponent(
+                                    ownerName
+                                ) +
+
+                                "&phoneNumber=" +
+                                encodeURIComponent(
+                                    phoneNumber
+                                ) +
+
+                                "&vehicleType=" +
+                                encodeURIComponent(
+                                    vehicleType
+                                )
+                        }
+                    );
+
+
+
+                // =========================
+                // CHECK HTTP RESPONSE
+                // =========================
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server returned HTTP " +
+                        response.status
+                    );
+
+                }
+
+
+
+                // =========================
+                // READ JSON
+                // =========================
+
+                const result =
+                    await response.json();
+
+
+
+                // =========================
+                // SUCCESS
+                // =========================
+
+                if (result.success) {
+
+                    alert(
+                        "Vehicle parked successfully!\n\n" +
+
+                        "Vehicle: " +
+                        result.vehicleNumber +
+
+                        "\nParking Slot: " +
+                        result.slotNumber
+                    );
+
+
+                    vehicleEntryForm.reset();
+
+
+                }
+
+
+                    // =========================
+                    // BACKEND ERROR
+                // =========================
+
+                else {
+
+                    alert(
+                        result.message ||
+                        "Unable to park vehicle."
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Vehicle entry error:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to connect to the server.\n\n" +
+                    "Make sure ParkingServer is running on port 8080."
+                );
+
+
+            } finally {
+
+                // =========================
+                // ENABLE BUTTON AGAIN
+                // =========================
+
+                parkButton.disabled = false;
+
+                parkButton.textContent =
+                    "Park Vehicle";
+
+            }
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+
+</html>

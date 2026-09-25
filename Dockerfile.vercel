@@ -1,0 +1,11 @@
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY target/ParkingManagementSystem-1.0-SNAPSHOT.jar app.jar
+
+COPY frontend ./frontend
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "app.jar"]

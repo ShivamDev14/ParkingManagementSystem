@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Vehicle Exit - Parking Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="dashboard-container">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-small">
+                🅿
+            </div>
+
+            <h2>Parking System</h2>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="dashboard.html" class="nav-item">
+                <span>📊</span>
+                Dashboard
+            </a>
+
+            <a href="vehicle-entry.html" class="nav-item">
+                <span>🚗</span>
+                Vehicle Entry
+            </a>
+
+            <a href="vehicle-exit.html" class="nav-item active">
+                <span>🚙</span>
+                Vehicle Exit
+            </a>
+
+            <a href="parking-slots.html" class="nav-item">
+                <span>🅿️</span>
+                Parking Slots
+            </a>
+
+            <a href="parking-history.html" class="nav-item">
+                <span>📋</span>
+                Parking History
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html" class="nav-item logout">
+                <span>🚪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="top-header">
+
+            <div>
+
+                <h1>Vehicle Exit</h1>
+
+                <p>
+                    Process vehicle exit and calculate parking charges
+                </p>
+
+            </div>
+
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div>
+
+                    <strong>Admin</strong>
+
+                    <small>Administrator</small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= SEARCH VEHICLE ================= -->
+
+        <section class="form-card">
+
+            <div class="form-header">
+
+                <h2>Find Parked Vehicle</h2>
+
+                <p>
+                    Enter the vehicle number to retrieve parking details
+                </p>
+
+            </div>
+
+
+            <form class="search-form" id="searchForm">
+
+                <div class="search-input-group">
+
+                    <label for="exitVehicleNumber">
+                        Vehicle Number
+                    </label>
+
+                    <input
+                            type="text"
+                            id="exitVehicleNumber"
+                            placeholder="Example: MH01AB1234"
+                            maxlength="20"
+                            required
+                    >
+
+                </div>
+
+
+                <button
+                        type="submit"
+                        class="btn-primary search-button"
+                        id="searchButton"
+                >
+                    Search Vehicle
+                </button>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- ================= VEHICLE DETAILS ================= -->
+
+        <section
+                class="vehicle-details-card"
+                id="vehicleDetails"
+                style="display: none;"
+        >
+
+            <div class="form-header">
+
+                <h2>Parking Details</h2>
+
+                <p>
+                    Current parking information
+                </p>
+
+            </div>
+
+
+            <div class="details-grid">
+
+
+                <div class="detail-item">
+
+                    <span>Vehicle Number</span>
+
+                    <strong id="displayVehicleNumber">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>Vehicle Type</span>
+
+                    <strong id="displayVehicleType">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>Parking Slot</span>
+
+                    <strong id="displaySlot">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>Entry Time</span>
+
+                    <strong id="displayEntryTime">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>Current Time</span>
+
+                    <strong id="displayCurrentTime">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>Parking Duration</span>
+
+                    <strong id="displayDuration">
+                        -
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="payment-section">
+
+                <div>
+
+                    <span>Total Parking Fee</span>
+
+                    <h2 id="displayFee">
+                        ₹0.00
+                    </h2>
+
+                </div>
+
+
+                <button
+                        class="btn-exit"
+                        id="exitButton"
+                        type="button"
+                >
+                    Confirm Vehicle Exit
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+    </main>
+
+</div>
+
+
+
+<script>
+
+
+    // =====================================================
+    // BACKEND URL
+    // =====================================================
+
+    const API_BASE_URL =
+        "http://localhost:8080";
+
+
+    // =====================================================
+    // CURRENT SEARCHED VEHICLE
+    // =====================================================
+
+    let searchedVehicleNumber = "";
+
+
+
+    // =====================================================
+    // SEARCH FORM
+    // =====================================================
+
+    document
+        .getElementById("searchForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const vehicleNumber =
+                    document
+                        .getElementById(
+                            "exitVehicleNumber"
+                        )
+                        .value
+                        .trim()
+                        .toUpperCase();
+
+
+                if (!vehicleNumber) {
+
+                    alert(
+                        "Please enter a vehicle number."
+                    );
+
+                    return;
+
+                }
+
+
+                const searchButton =
+                    document.getElementById(
+                        "searchButton"
+                    );
+
+
+                searchButton.disabled = true;
+
+                searchButton.textContent =
+                    "Searching...";
+
+
+                try {
+
+
+                    // =================================================
+                    // SEARCH VEHICLE
+                    // =================================================
+
+                    const response =
+                        await fetch(
+                            API_BASE_URL +
+                            "/api/vehicle/search",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    "vehicleNumber=" +
+                                    encodeURIComponent(
+                                        vehicleNumber
+                                    )
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned HTTP " +
+                            response.status
+                        );
+
+                    }
+
+
+                    const result =
+                        await response.json();
+
+
+                    // =================================================
+                    // VEHICLE NOT FOUND
+                    // =================================================
+
+                    if (!result.success) {
+
+                        alert(
+                            result.message ||
+                            "Vehicle not found."
+                        );
+
+
+                        document
+                            .getElementById(
+                                "vehicleDetails"
+                            )
+                            .style.display =
+                            "none";
+
+
+                        searchedVehicleNumber = "";
+
+                        return;
+
+                    }
+
+
+                    // =================================================
+                    // STORE VEHICLE NUMBER
+                    // =================================================
+
+                    searchedVehicleNumber =
+                        result.vehicleNumber;
+
+
+
+                    // =================================================
+                    // DISPLAY VEHICLE INFORMATION
+                    // =================================================
+
+                    document
+                        .getElementById(
+                            "displayVehicleNumber"
+                        )
+                        .textContent =
+                        result.vehicleNumber;
+
+
+                    document
+                        .getElementById(
+                            "displayVehicleType"
+                        )
+                        .textContent =
+                        result.vehicleType;
+
+
+                    document
+                        .getElementById(
+                            "displaySlot"
+                        )
+                        .textContent =
+                        result.slotNumber;
+
+
+
+                    // =================================================
+                    // ENTRY TIME
+                    // =================================================
+
+                    const entryTimeString =
+                        String(
+                            result.entryTime
+                        ).replace(
+                            " ",
+                            "T"
+                        );
+
+
+                    const entryDate =
+                        new Date(
+                            entryTimeString
+                        );
+
+
+                    if (
+                        isNaN(
+                            entryDate.getTime()
+                        )
+                    ) {
+
+                        throw new Error(
+                            "Invalid entry time received from server."
+                        );
+
+                    }
+
+
+                    document
+                        .getElementById(
+                            "displayEntryTime"
+                        )
+                        .textContent =
+                        formatDateTime(
+                            entryDate
+                        );
+
+
+
+                    // =================================================
+                    // CURRENT TIME
+                    // =================================================
+
+                    const currentDate =
+                        new Date();
+
+
+                    document
+                        .getElementById(
+                            "displayCurrentTime"
+                        )
+                        .textContent =
+                        formatDateTime(
+                            currentDate
+                        );
+
+
+
+                    // =================================================
+                    // CALCULATE PREVIEW
+                    // =================================================
+                    //
+                    // This is only a display preview.
+                    // The final duration and fee are calculated
+                    // by the Java backend when exit is confirmed.
+                    //
+
+                    const durationMilliseconds =
+                        Math.max(
+                            0,
+                            currentDate.getTime() -
+                            entryDate.getTime()
+                        );
+
+
+                    const durationMinutes =
+                        Math.floor(
+                            durationMilliseconds /
+                            (1000 * 60)
+                        );
+
+
+                    const durationHours =
+                        Math.max(
+                            1,
+                            Math.ceil(
+                                durationMinutes / 60
+                            )
+                        );
+
+
+                    document
+                        .getElementById(
+                            "displayDuration"
+                        )
+                        .textContent =
+                        durationHours +
+                        " Hour" +
+                        (
+                            durationHours === 1
+                                ? ""
+                                : "s"
+                        );
+
+
+
+                    // =================================================
+                    // PREVIEW PARKING RATE
+                    // =================================================
+
+                    let rate = 20;
+
+
+                    const vehicleType =
+                        String(
+                            result.vehicleType || ""
+                        ).toLowerCase();
+
+
+                    if (
+                        vehicleType === "bike"
+                    ) {
+
+                        rate = 10;
+
+                    }
+                    else if (
+                        vehicleType === "suv"
+                    ) {
+
+                        rate = 30;
+
+                    }
+
+
+
+                    // =================================================
+                    // PREVIEW FEE
+                    // =================================================
+
+                    const previewFee =
+                        durationHours * rate;
+
+
+                    document
+                        .getElementById(
+                            "displayFee"
+                        )
+                        .textContent =
+                        "₹" +
+                        previewFee.toFixed(2);
+
+
+
+                    // =================================================
+                    // SHOW DETAILS
+                    // =================================================
+
+                    document
+                        .getElementById(
+                            "vehicleDetails"
+                        )
+                        .style.display =
+                        "block";
+
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Vehicle search error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Unable to connect to the server.\n\n" +
+                        "Make sure ParkingServer is running on port 8080."
+                    );
+
+                }
+                finally {
+
+                    searchButton.disabled = false;
+
+                    searchButton.textContent =
+                        "Search Vehicle";
+
+                }
+
+            }
+        );
+
+
+
+    // =====================================================
+    // CONFIRM VEHICLE EXIT
+    // =====================================================
+
+    document
+        .getElementById("exitButton")
+        .addEventListener(
+            "click",
+            async function() {
+
+
+                if (!searchedVehicleNumber) {
+
+                    alert(
+                        "Please search for a vehicle first."
+                    );
+
+                    return;
+
+                }
+
+
+                const confirmExit =
+                    confirm(
+                        "Are you sure you want to process this vehicle exit?"
+                    );
+
+
+                if (!confirmExit) {
+
+                    return;
+
+                }
+
+
+                const exitButton =
+                    document.getElementById(
+                        "exitButton"
+                    );
+
+
+                exitButton.disabled = true;
+
+                exitButton.textContent =
+                    "Processing...";
+
+
+                try {
+
+
+                    // =================================================
+                    // PROCESS EXIT
+                    // =================================================
+
+                    const response =
+                        await fetch(
+                            API_BASE_URL +
+                            "/api/vehicle/exit",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    "vehicleNumber=" +
+                                    encodeURIComponent(
+                                        searchedVehicleNumber
+                                    )
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned HTTP " +
+                            response.status
+                        );
+
+                    }
+
+
+                    const result =
+                        await response.json();
+
+
+
+                    // =================================================
+                    // SUCCESS
+                    // =================================================
+
+                    if (result.success) {
+
+                        alert(
+                            "Vehicle exit completed!\n\n" +
+
+                            "Vehicle: " +
+                            result.vehicleNumber +
+
+                            "\nDuration: " +
+                            result.durationHours +
+                            " hour(s)" +
+
+                            "\nParking Fee: ₹" +
+                            Number(
+                                result.parkingFee
+                            ).toFixed(2)
+                        );
+
+
+                        // Hide details
+
+                        document
+                            .getElementById(
+                                "vehicleDetails"
+                            )
+                            .style.display =
+                            "none";
+
+
+                        // Clear search form
+
+                        document
+                            .getElementById(
+                                "searchForm"
+                            )
+                            .reset();
+
+
+                        // Clear stored vehicle
+
+                        searchedVehicleNumber = "";
+
+
+                    }
+                    else {
+
+                        alert(
+                            result.message ||
+                            "Vehicle exit failed."
+                        );
+
+                    }
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Vehicle exit error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Unable to connect to the server.\n\n" +
+                        "Make sure ParkingServer is running on port 8080."
+                    );
+
+                }
+                finally {
+
+                    exitButton.disabled = false;
+
+                    exitButton.textContent =
+                        "Confirm Vehicle Exit";
+
+                }
+
+            }
+        );
+
+
+
+    // =====================================================
+    // DATE/TIME FORMATTER
+    // =====================================================
+
+    function formatDateTime(date) {
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }
+        );
+
+    }
+
+
+</script>
+
+</body>
+
+</html>

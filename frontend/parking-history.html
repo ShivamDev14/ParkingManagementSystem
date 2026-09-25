@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Parking History - Parking Management System
+    </title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="dashboard-container">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-small">
+                🅿
+            </div>
+
+            <h2>Parking System</h2>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="dashboard.html"
+               class="nav-item">
+
+                <span>📊</span>
+                Dashboard
+
+            </a>
+
+
+            <a href="vehicle-entry.html"
+               class="nav-item">
+
+                <span>🚗</span>
+                Vehicle Entry
+
+            </a>
+
+
+            <a href="vehicle-exit.html"
+               class="nav-item">
+
+                <span>🚙</span>
+                Vehicle Exit
+
+            </a>
+
+
+            <a href="parking-slots.html"
+               class="nav-item">
+
+                <span>🅿️</span>
+                Parking Slots
+
+            </a>
+
+
+            <a href="parking-history.html"
+               class="nav-item active">
+
+                <span>📋</span>
+                Parking History
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html"
+               class="nav-item logout">
+
+                <span>🚪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="top-header">
+
+            <div>
+
+                <h1>Parking History</h1>
+
+                <p>
+                    View previous parking transactions
+                </p>
+
+            </div>
+
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div>
+
+                    <strong>Admin</strong>
+
+                    <small>Administrator</small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= HISTORY CARD ================= -->
+
+        <section class="content-card">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Parking Transactions</h2>
+
+                    <p>
+                        Complete history of vehicle
+                        parking and exits
+                    </p>
+
+                </div>
+
+
+                <button
+                        type="button"
+                        onclick="loadParkingHistory()"
+                        style="
+                        padding: 10px 16px;
+                        cursor: pointer;
+                    "
+                >
+
+                    🔄 Refresh
+
+                </button>
+
+            </div>
+
+
+
+            <!-- ================= HISTORY TABLE ================= -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Vehicle Number
+                        </th>
+
+                        <th>
+                            Vehicle Type
+                        </th>
+
+                        <th>
+                            Slot
+                        </th>
+
+                        <th>
+                            Entry Time
+                        </th>
+
+                        <th>
+                            Exit Time
+                        </th>
+
+                        <th>
+                            Duration
+                        </th>
+
+                        <th>
+                            Fee
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody id="historyTableBody">
+
+                    <tr>
+
+                        <td colspan="8"
+                            style="text-align: center;">
+
+                            Loading parking history...
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+
+
+    // =====================================================
+    // BACKEND URL
+    // =====================================================
+
+    const API_BASE_URL =
+        "http://localhost:8080";
+
+
+    // =====================================================
+    // LOAD PARKING HISTORY
+    // =====================================================
+
+    async function loadParkingHistory() {
+
+        const tableBody =
+            document.getElementById(
+                "historyTableBody"
+            );
+
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td colspan="8"
+                    style="text-align: center;">
+
+                    Loading parking history...
+
+                </td>
+
+            </tr>
+
+        `;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    API_BASE_URL +
+                    "/api/parking/history"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server returned HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to load parking history"
+                );
+
+            }
+
+
+            // =================================================
+            // NO RECORDS
+            // =================================================
+
+            if (
+                !data.records ||
+                data.records.length === 0
+            ) {
+
+                tableBody.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="8"
+                            style="text-align: center;">
+
+                            No parking transactions found.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            // =================================================
+            // CLEAR TABLE
+            // =================================================
+
+            tableBody.innerHTML = "";
+
+
+            // =================================================
+            // DISPLAY RECORDS
+            // =================================================
+
+            data.records.forEach(record => {
+
+                const row =
+                    document.createElement("tr");
+
+
+                // -----------------------------
+                // ENTRY TIME
+                // -----------------------------
+
+                const entryTime =
+                    formatDateTime(
+                        record.entryTime
+                    );
+
+
+                // -----------------------------
+                // EXIT TIME
+                // -----------------------------
+
+                const exitTime =
+                    record.exitTime
+                        ? formatDateTime(
+                            record.exitTime
+                        )
+                        : "-";
+
+
+                // -----------------------------
+                // DURATION
+                // -----------------------------
+
+                let duration = "-";
+
+
+                if (
+                    record.durationHours !== null &&
+                    record.durationHours !== undefined
+                ) {
+
+                    const hours =
+                        Number(
+                            record.durationHours
+                        );
+
+
+                    if (!isNaN(hours)) {
+
+                        duration =
+                            hours +
+                            " Hour" +
+                            (hours === 1
+                                ? ""
+                                : "s");
+
+                    }
+
+                }
+
+
+                // -----------------------------
+                // FEE
+                // -----------------------------
+
+                let fee = "₹0.00";
+
+
+                if (
+                    record.parkingFee !== null &&
+                    record.parkingFee !== undefined
+                ) {
+
+                    const amount =
+                        Number(
+                            record.parkingFee
+                        );
+
+
+                    if (!isNaN(amount)) {
+
+                        fee =
+                            "₹" +
+                            amount.toFixed(2);
+
+                    }
+
+                }
+
+
+                // -----------------------------
+                // STATUS CLASS
+                // -----------------------------
+
+                let statusClass = "";
+
+
+                if (
+                    record.status &&
+                    record.status.toLowerCase() ===
+                    "exited"
+                ) {
+
+                    statusClass = "exited";
+
+                } else if (
+                    record.status &&
+                    record.status.toLowerCase() ===
+                    "parked"
+                ) {
+
+                    statusClass = "parked";
+
+                }
+
+
+                // =================================================
+                // CREATE TABLE ROW
+                // =================================================
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHtml(
+                    record.vehicleNumber
+                )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                    record.vehicleType
+                )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                    record.slotNumber
+                )}
+                    </td>
+
+                    <td>
+                        ${entryTime}
+                    </td>
+
+                    <td>
+                        ${exitTime}
+                    </td>
+
+                    <td>
+                        ${duration}
+                    </td>
+
+                    <td>
+                        ${fee}
+                    </td>
+
+                    <td>
+
+                        <span class="status ${statusClass}">
+
+                            ${escapeHtml(
+                    record.status
+                )}
+
+                        </span>
+
+                    </td>
+
+                `;
+
+
+                tableBody.appendChild(row);
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Parking history loading error:",
+                error
+            );
+
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="8"
+                        style="text-align: center;">
+
+                        Failed to load parking history.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // FORMAT DATE AND TIME
+    // =====================================================
+
+    function formatDateTime(dateTime) {
+
+        if (!dateTime) {
+
+            return "-";
+
+        }
+
+
+        const date =
+            new Date(
+                dateTime.replace(" ", "T")
+            );
+
+
+        if (
+            isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return dateTime;
+
+        }
+
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }
+        );
+
+    }
+
+
+
+    // =====================================================
+    // HTML ESCAPE
+    // =====================================================
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+
+    // =====================================================
+    // LOAD HISTORY WHEN PAGE OPENS
+    // =====================================================
+
+    loadParkingHistory();
+
+
+</script>
+
+
+</body>
+
+</html>

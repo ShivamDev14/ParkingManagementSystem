@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Parking Slots - Parking Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-small">🅿</div>
+            <h2>Parking System</h2>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="dashboard.html" class="nav-item">
+                <span>📊</span>
+                Dashboard
+            </a>
+
+            <a href="vehicle-entry.html" class="nav-item">
+                <span>🚗</span>
+                Vehicle Entry
+            </a>
+
+            <a href="vehicle-exit.html" class="nav-item">
+                <span>🚙</span>
+                Vehicle Exit
+            </a>
+
+            <a href="parking-slots.html" class="nav-item active">
+                <span>🅿️</span>
+                Parking Slots
+            </a>
+
+            <a href="parking-history.html" class="nav-item">
+                <span>📋</span>
+                Parking History
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html" class="nav-item logout">
+                <span>🚪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="top-header">
+
+            <div>
+                <h1>Parking Slots</h1>
+                <p>View current parking slot availability</p>
+            </div>
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">A</div>
+
+                <div>
+                    <strong>Admin</strong>
+                    <small>Administrator</small>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- SLOT SUMMARY -->
+        <section class="slot-summary">
+
+            <div class="slot-summary-card">
+
+                <span class="summary-icon total">🅿️</span>
+
+                <div>
+                    <p>Total Slots</p>
+                    <h2 id="totalSlots">0</h2>
+                </div>
+
+            </div>
+
+
+            <div class="slot-summary-card">
+
+                <span class="summary-icon available">✓</span>
+
+                <div>
+                    <p>Available</p>
+                    <h2 id="availableSlots">0</h2>
+                </div>
+
+            </div>
+
+
+            <div class="slot-summary-card">
+
+                <span class="summary-icon occupied">🚗</span>
+
+                <div>
+                    <p>Occupied</p>
+                    <h2 id="occupiedSlots">0</h2>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PARKING SLOTS -->
+        <section class="content-card">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Parking Slot Status</h2>
+                    <p>Green = Available | Red = Occupied</p>
+                </div>
+
+            </div>
+
+
+            <!-- JavaScript will generate the slots here -->
+            <div class="slot-grid" id="slotGrid"></div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    async function loadParkingSlots() {
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:8080/api/parking/slots"
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch parking slots");
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(
+                    data.message || "Unable to load parking slots"
+                );
+            }
+
+            const slots = data.slots || [];
+
+            const slotGrid = document.getElementById("slotGrid");
+
+            const totalSlots =
+                document.getElementById("totalSlots");
+
+            const availableSlots =
+                document.getElementById("availableSlots");
+
+            const occupiedSlots =
+                document.getElementById("occupiedSlots");
+
+
+            // Clear existing slots
+            slotGrid.innerHTML = "";
+
+
+            // Calculate counts
+            const total = slots.length;
+
+            const available = slots.filter(
+                slot => slot.status.toLowerCase() === "available"
+            ).length;
+
+            const occupied = slots.filter(
+                slot => slot.status.toLowerCase() === "occupied"
+            ).length;
+
+
+            // Update summary
+            totalSlots.textContent = total;
+            availableSlots.textContent = available;
+            occupiedSlots.textContent = occupied;
+
+
+            // Generate slot cards
+            slots.forEach(slot => {
+
+                const slotElement =
+                    document.createElement("div");
+
+                const isAvailable =
+                    slot.status.toLowerCase() === "available";
+
+
+                slotElement.className =
+                    isAvailable
+                        ? "parking-slot available-slot"
+                        : "parking-slot occupied-slot";
+
+
+                slotElement.innerHTML = `
+                <strong>${slot.slotNumber}</strong>
+                <span>${isAvailable ? "Available" : "Occupied"}</span>
+            `;
+
+
+                slotGrid.appendChild(slotElement);
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading parking slots:",
+                error
+            );
+
+            document.getElementById("slotGrid").innerHTML = `
+            <p style="color: red;">
+                Unable to load parking slot information.
+            </p>
+        `;
+
+        }
+
+    }
+
+
+    // Load slots when page opens
+    loadParkingSlots();
+
+</script>
+
+</body>
+</html>

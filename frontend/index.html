@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Parking Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-box">
+
+        <div class="logo">
+            🅿
+        </div>
+
+        <h1>
+            Parking Management
+        </h1>
+
+        <p class="subtitle">
+            System Login
+        </p>
+
+
+        <!-- LOGIN FORM -->
+
+        <form id="loginForm">
+
+
+            <!-- USERNAME -->
+
+            <div class="input-group">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                >
+
+            </div>
+
+
+            <!-- PASSWORD -->
+
+            <div class="input-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                >
+
+            </div>
+
+
+            <!-- LOGIN BUTTON -->
+
+            <button
+                    type="submit"
+                    id="loginButton"
+            >
+                Login
+            </button>
+
+
+            <!-- MESSAGE -->
+
+            <p
+                    id="loginMessage"
+                    style="
+                    margin-top: 15px;
+                    text-align: center;
+                    font-size: 14px;
+                "
+            ></p>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+    // =====================================================
+    // BACKEND URL
+    // =====================================================
+
+    const API_BASE_URL =
+        "http://localhost:8080";
+
+
+
+    // =====================================================
+    // LOGIN
+    // =====================================================
+
+    document
+        .getElementById("loginForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                // Get input values
+
+                const username =
+                    document
+                        .getElementById("username")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                const message =
+                    document
+                        .getElementById("loginMessage");
+
+
+                const loginButton =
+                    document
+                        .getElementById("loginButton");
+
+
+                if (!username || !password) {
+
+                    message.textContent =
+                        "Please enter username and password.";
+
+                    message.style.color =
+                        "red";
+
+                    return;
+
+                }
+
+
+                // Disable button while processing
+
+                loginButton.disabled = true;
+
+                loginButton.textContent =
+                    "Logging in...";
+
+
+                message.textContent =
+                    "";
+
+
+
+                try {
+
+
+                    // =================================================
+                    // SEND LOGIN REQUEST
+                    // =================================================
+
+                    const response =
+                        await fetch(
+                            API_BASE_URL +
+                            "/api/login",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    "username=" +
+                                    encodeURIComponent(
+                                        username
+                                    ) +
+
+                                    "&password=" +
+                                    encodeURIComponent(
+                                        password
+                                    )
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned HTTP " +
+                            response.status
+                        );
+
+                    }
+
+
+                    const result =
+                        await response.json();
+
+
+
+                    // =================================================
+                    // LOGIN SUCCESS
+                    // =================================================
+
+                    if (result.success) {
+
+                        message.textContent =
+                            "Login successful!";
+
+                        message.style.color =
+                            "green";
+
+
+                        // Redirect to dashboard
+
+                        setTimeout(
+                            function() {
+
+                                window.location.href =
+                                    "dashboard.html";
+
+                            },
+                            500
+                        );
+
+
+                    }
+
+                        // =================================================
+                        // LOGIN FAILED
+                    // =================================================
+
+                    else {
+
+                        message.textContent =
+                            result.message ||
+                            "Invalid username or password.";
+
+                        message.style.color =
+                            "red";
+
+
+                        loginButton.disabled =
+                            false;
+
+                        loginButton.textContent =
+                            "Login";
+
+                    }
+
+                }
+
+
+                    // =====================================================
+                    // SERVER CONNECTION ERROR
+                    // =====================================================
+
+                catch (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
+
+                    message.textContent =
+                        "Unable to connect to the server.";
+
+
+                    message.style.color =
+                        "red";
+
+
+                    loginButton.disabled =
+                        false;
+
+                    loginButton.textContent =
+                        "Login";
+
+                }
+
+            }
+        );
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - Parking Management System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="dashboard-container">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-small">
+                🅿
+            </div>
+
+            <h2>Parking System</h2>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="dashboard.html"
+               class="nav-item active">
+
+                <span>📊</span>
+                Dashboard
+
+            </a>
+
+
+            <a href="vehicle-entry.html"
+               class="nav-item">
+
+                <span>🚗</span>
+                Vehicle Entry
+
+            </a>
+
+
+            <a href="vehicle-exit.html"
+               class="nav-item">
+
+                <span>🚙</span>
+                Vehicle Exit
+
+            </a>
+
+
+            <a href="parking-slots.html"
+               class="nav-item">
+
+                <span>🅿️</span>
+                Parking Slots
+
+            </a>
+
+
+            <a href="parking-history.html"
+               class="nav-item">
+
+                <span>📋</span>
+                Parking History
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="index.html"
+               class="nav-item logout">
+
+                <span>🚪</span>
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="top-header">
+
+            <div>
+
+                <h1>Dashboard</h1>
+
+                <p>
+                    Welcome to Parking Management System
+                </p>
+
+            </div>
+
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div>
+
+                    <strong>Admin</strong>
+
+                    <small>Administrator</small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= STATISTICS ================= -->
+
+        <section class="stats-container">
+
+
+            <!-- TOTAL SLOTS -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    🅿️
+                </div>
+
+                <div>
+
+                    <p>Total Slots</p>
+
+                    <h2 id="totalSlots">--</h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- OCCUPIED -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon red">
+                    🚗
+                </div>
+
+                <div>
+
+                    <p>Occupied</p>
+
+                    <h2 id="occupiedSlots">--</h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- AVAILABLE -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ✓
+                </div>
+
+                <div>
+
+                    <p>Available</p>
+
+                    <h2 id="availableSlots">--</h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CURRENTLY PARKED -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    🚘
+                </div>
+
+                <div>
+
+                    <p>Currently Parked</p>
+
+                    <h2 id="parkedVehicles">--</h2>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= RECENT ACTIVITY ================= -->
+
+        <section class="content-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Recent Parking Activity</h2>
+
+                    <p>Latest vehicle entries</p>
+
+                </div>
+
+
+                <a href="parking-history.html">
+                    View All
+                </a>
+
+            </div>
+
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Vehicle Number</th>
+
+                        <th>Vehicle Type</th>
+
+                        <th>Slot</th>
+
+                        <th>Entry Time</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody id="recentActivity">
+
+                    <tr>
+
+                        <td colspan="5"
+                            style="text-align: center;">
+
+                            Loading parking activity...
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- ================= DASHBOARD JAVASCRIPT ================= -->
+
+<script>
+
+
+    // =====================================================
+    // BACKEND URL
+    // =====================================================
+
+    const API_BASE_URL =
+        "http://localhost:8080";
+
+
+    // =====================================================
+    // LOAD DASHBOARD STATISTICS
+    // =====================================================
+
+    async function loadDashboard() {
+
+        try {
+
+            const response =
+                await fetch(
+                    API_BASE_URL +
+                    "/api/dashboard"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Dashboard API returned HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to load dashboard"
+                );
+
+            }
+
+
+            // =========================
+            // UPDATE STATISTICS
+            // =========================
+
+            document.getElementById(
+                "totalSlots"
+            ).textContent =
+                data.totalSlots;
+
+
+            document.getElementById(
+                "occupiedSlots"
+            ).textContent =
+                data.occupiedSlots;
+
+
+            document.getElementById(
+                "availableSlots"
+            ).textContent =
+                data.availableSlots;
+
+
+            document.getElementById(
+                "parkedVehicles"
+            ).textContent =
+                data.parkedVehicles;
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard loading error:",
+                error
+            );
+
+
+            document.getElementById(
+                "totalSlots"
+            ).textContent = "—";
+
+
+            document.getElementById(
+                "occupiedSlots"
+            ).textContent = "—";
+
+
+            document.getElementById(
+                "availableSlots"
+            ).textContent = "—";
+
+
+            document.getElementById(
+                "parkedVehicles"
+            ).textContent = "—";
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // LOAD RECENT PARKING ACTIVITY
+    // =====================================================
+
+    async function loadRecentActivity() {
+
+        const tableBody =
+            document.getElementById(
+                "recentActivity"
+            );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    API_BASE_URL +
+                    "/api/parking/history"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "History API returned HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to load parking history"
+                );
+
+            }
+
+
+            const records =
+                data.records || [];
+
+
+            // =========================
+            // NO RECORDS
+            // =========================
+
+            if (records.length === 0) {
+
+                tableBody.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="5"
+                            style="text-align: center;">
+
+                            No parking activity found.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+            }
+
+
+            // =========================
+            // SHOW LATEST 5 RECORDS
+            // =========================
+
+            const recentRecords =
+                records.slice(0, 5);
+
+
+            tableBody.innerHTML =
+                recentRecords.map(record => {
+
+                    let statusClass = "";
+
+                    if (
+                        record.status &&
+                        record.status.toLowerCase() ===
+                        "parked"
+                    ) {
+
+                        statusClass =
+                            "status-parked";
+
+                    } else {
+
+                        statusClass =
+                            "status-exited";
+
+                    }
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHtml(
+                        record.vehicleNumber
+                    )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                        record.vehicleType
+                    )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                        record.slotNumber
+                    )}
+                            </td>
+
+                            <td>
+                                ${formatDateTime(
+                        record.entryTime
+                    )}
+                            </td>
+
+                            <td>
+
+                                <span class="${statusClass}">
+
+                                    ${escapeHtml(
+                        record.status
+                    )}
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }).join("");
+
+
+        } catch (error) {
+
+            console.error(
+                "Recent activity loading error:",
+                error
+            );
+
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="5"
+                        style="text-align: center;">
+
+                        Unable to load parking activity.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // FORMAT DATE AND TIME
+    // =====================================================
+
+    function formatDateTime(dateTime) {
+
+        if (!dateTime) {
+
+            return "—";
+
+        }
+
+
+        const date =
+            new Date(
+                dateTime.replace(" ", "T")
+            );
+
+
+        if (isNaN(date.getTime())) {
+
+            return dateTime;
+
+        }
+
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }
+        );
+
+    }
+
+
+
+    // =====================================================
+    // BASIC HTML ESCAPE
+    // =====================================================
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+
+    // =====================================================
+    // INITIALIZE DASHBOARD
+    // =====================================================
+
+    loadDashboard();
+
+    loadRecentActivity();
+
+
+</script>
+
+
+</body>
+
+</html>
