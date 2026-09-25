@@ -114,9 +114,14 @@
     // BACKEND URL
     // =====================================================
 
-    const API_BASE_URL =
-        "http://localhost:8080";
+    // Empty string means use the same server/domain.
+    // Local:
+    // /api/login
+    //
+    // Vercel:
+    // https://parking-management-system-henna.vercel.app/api/login
 
+    const API_BASE_URL = "";
 
 
     // =====================================================
@@ -182,7 +187,6 @@
                     "";
 
 
-
                 try {
 
 
@@ -230,7 +234,6 @@
                         await response.json();
 
 
-
                     // =================================================
                     // LOGIN SUCCESS
                     // =================================================
@@ -256,8 +259,8 @@
                             500
                         );
 
-
                     }
+
 
                         // =================================================
                         // LOGIN FAILED
@@ -298,7 +301,6 @@
 
                     message.textContent =
                         "Unable to connect to the server.";
-
 
                     message.style.color =
                         "red";
